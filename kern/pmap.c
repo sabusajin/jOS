@@ -33,6 +33,7 @@ static void
 i386_detect_memory(void)
 {
 	size_t basemem, extmem, ext16mem, totalmem;
+	
 
 	// Use CMOS calls to measure available base & extended memory.
 	// (CMOS calls return results in kilobytes.)
@@ -52,8 +53,8 @@ i386_detect_memory(void)
 	npages = totalmem / (PGSIZE / 1024);
 	npages_basemem = basemem / (PGSIZE / 1024);
 
-	cprintf("Physical memory: %uK available, base = %uK, extended = %uK\n",
-		totalmem, basemem, totalmem - basemem);
+	cprintf("Physical memory: %uK available, base = %uK, extended = %uK\n npages = %u , npages_basemem = %u , EXTPHYSMEM = %u\n",
+		totalmem, basemem, totalmem - basemem, npages, npages_basemem, EXTPHYSMEM/PGSIZE);
 }
 
 
@@ -103,7 +104,16 @@ boot_alloc(uint32_t n)
 	//
 	// LAB 2: Your code here.
 
-	return NULL;
+	result = nextfree;  //return a pointer to the start of the allocated space
+
+	nextfree = ROUNDUP(nextfree + n, PGSIZE);
+
+	if (KERNBASE + npages*PGSIZE < (uint32_t)nextfree)
+		panic ("boot_alloc - Out of memory \n ");
+
+
+
+	return result;  //return a pointer to the start of the allocated space
 }
 
 // Set up a two-level page table:
@@ -125,7 +135,7 @@ mem_init(void)
 	i386_detect_memory();
 
 	// Remove this line when you're ready to test this function.
-	panic("mem_init: This function is not finished\n");
+	//panic("mem_init: This function is not finished\n");
 
 	//////////////////////////////////////////////////////////////////////
 	// create initial page directory.
@@ -148,6 +158,9 @@ mem_init(void)
 	// array.  'npages' is the number of physical pages in memory.  Use memset
 	// to initialize all fields of each struct PageInfo to 0.
 	// Your code goes here:
+
+	pages = (struct PageInfo *) boot_alloc (npages * sizeof (struct PageInfo) );
+	memset (pages, 0, npages * sizeof (struct PageInfo));
 
 
 	//////////////////////////////////////////////////////////////////////
@@ -252,10 +265,26 @@ page_init(void)
 	// NB: DO NOT actually touch the physical memory corresponding to
 	// free pages!
 	size_t i;
+	// The number of pages occupied in the extended memory area
+	uint32_t kern_pages = ((uint32_t)boot_alloc(0) - KERNBASE)/PGSIZE;
+	cprintf ("kern_pages = %u\n", kern_pages);
 	for (i = 0; i < npages; i++) {
-		pages[i].pp_ref = 0;
-		pages[i].pp_link = page_free_list;
-		page_free_list = &pages[i];
+		pages[i].pp_link = NULL;
+
+		if (i==0){
+			pages[i].pp_ref = 1;
+		}
+		else if (i>=npages_basemem && i< EXTPHYSMEM/PGSIZE + kern_pages)
+		{
+			pages[i].pp_ref = 1;
+		}
+		else
+		{
+			pages[i].pp_ref = 0;
+			pages[i].pp_link = page_free_list;
+			page_free_list = &pages[i];
+
+		}
 	}
 }
 
@@ -275,7 +304,24 @@ struct PageInfo *
 page_alloc(int alloc_flags)
 {
 	// Fill this function in
-	return 0;
+	struct PageInfo *pp = page_free_list;
+
+	if (pp)
+	{
+		page_free_list = pp->pp_link;
+		pp->pp_link = NULL;
+
+		assert (pp->pp_ref == 0);
+
+		if(alloc_flags & ALLOC_ZERO)
+			memset (page2kva(pp), 0, PGSIZE);
+		return pp;
+
+	}
+	else
+		return NULL;
+
+
 }
 
 //
@@ -288,6 +334,17 @@ page_free(struct PageInfo *pp)
 	// Fill this function in
 	// Hint: You may want to panic if pp->pp_ref is nonzero or
 	// pp->pp_link is not NULL.
+
+	
+
+	    assert (pp->pp_link == NULL);
+	    assert (pp->pp_ref == 0);
+	
+		pp->pp_link = page_free_list;
+	    page_free_list = pp;
+
+	
+	
 }
 
 //
