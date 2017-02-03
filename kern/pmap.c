@@ -144,7 +144,7 @@ mem_init(void)
 
 	//////////////////////////////////////////////////////////////////////
 	// Recursively insert PD in itself as a page table, to form
-	// a virtual page table at virtual address UVPT.
+	// a virtual page table at virtual address UVPT.alloc
 	// (For now, you don't have understand the greater purpose of the
 	// following line.)
 
@@ -308,10 +308,11 @@ page_alloc(int alloc_flags)
 
 	if (pp)
 	{
+		assert (pp->pp_ref == 0);
 		page_free_list = pp->pp_link;
 		pp->pp_link = NULL;
 
-		assert (pp->pp_ref == 0);
+		
 
 		if(alloc_flags & ALLOC_ZERO)
 			memset (page2kva(pp), 0, PGSIZE);
@@ -384,7 +385,29 @@ pte_t *
 pgdir_walk(pde_t *pgdir, const void *va, int create)
 {
 	// Fill this function in
-	return NULL;
+	pde_t *result;
+	struct PageInfo *pp;
+
+	pte_t *pt = pgdir + PDX(va);  //address of directory entry
+
+	if (!(*pt & PTE_P))   //check whether directory entry is present
+	{
+		if (create)       //check whether create is true
+		{
+			pp = page_alloc (1); //allocate a physical page to pp and memset it to 0
+			if (!pp)             //if unable to allocate, return NULL
+				return NULL;
+			pp->pp_ref++;         
+			*pt = page2pa (pp) + PTE_P + PTE_W + PTE_U;  //convert the page address to physical address and add permissions
+		}
+		else
+			return NULL;
+
+
+	}
+	result = KADDR(PTE_ADDR(*pt));  //calculate kernel address of the page table base 
+	return (result + PTX(va));      //return kernel address of page table entry
+	
 }
 
 //
