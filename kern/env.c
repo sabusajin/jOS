@@ -194,7 +194,15 @@ env_setup_vm(struct Env *e)
 	// LAB 3: Your code here.
 
 	e->env_pgdir = page2kva(p);
-	memcpy(e->env_pgdir, kern_pgdir, PGSIZE);
+
+	for(i = 0; i < PDX(UTOP); i++) {
+		e->env_pgdir[i] = 0;		
+	}
+
+	for(i = PDX(UTOP); i < NPDENTRIES; i++) {
+		e->env_pgdir[i] = kern_pgdir[i];
+	}
+	
 	p->pp_ref++;
 
 
