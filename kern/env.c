@@ -299,8 +299,8 @@ region_alloc(struct Env *e, void *va, size_t len)
 
 
 	int flag;
-	uint32_t *lower = (uint32_t *) ROUNDDOWN(va, PGSIZE);
-	uint32_t *upper = (uint32_t *) ROUNDUP(va+len, PGSIZE);
+	void *lower = (void *) ROUNDDOWN(va, PGSIZE);
+	void *upper = (void *) ROUNDUP(va+len, PGSIZE);
 
 	for (lower; lower<upper; lower+=PGSIZE)
 	{
