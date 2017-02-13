@@ -87,6 +87,8 @@ trap_init(void)
 	// LAB 3: Your code here.
 
   
+    
+
     SETGATE(idt[T_DIVIDE], 0, GD_KT, t_divide, 0);
 	SETGATE(idt[T_DEBUG], 0, GD_KT, t_debug, 0);
 	SETGATE(idt[T_NMI], 0, GD_KT, t_nmi, 0);
