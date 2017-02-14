@@ -46,6 +46,9 @@ void t_simderr();
 void t_syscall();
 
 
+
+
+
 static const char *trapname(int trapno)
 {
 	static const char * const excnames[] = {

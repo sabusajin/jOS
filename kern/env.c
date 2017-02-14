@@ -302,7 +302,7 @@ region_alloc(struct Env *e, void *va, size_t len)
 	void *lower = (void *) ROUNDDOWN(va, PGSIZE);
 	void *upper = (void *) ROUNDUP(va+len, PGSIZE);
 
-	for (lower; lower<upper; lower+=PGSIZE)
+	for (; lower<upper; lower+=PGSIZE)
 	{
 		struct PageInfo *pp = page_alloc(0);
 		if (!pp)
