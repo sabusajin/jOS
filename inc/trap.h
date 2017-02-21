@@ -89,3 +89,4 @@ struct UTrapframe {
 #endif /* !__ASSEMBLER__ */
 
 #endif /* !JOS_INC_TRAP_H */
+

@@ -1,4 +1,3 @@
-
 #include <inc/string.h>
 #include <inc/lib.h>
 
@@ -21,5 +20,4 @@ getchar(void)
 		sys_yield();
 	return r;
 }
-
 
