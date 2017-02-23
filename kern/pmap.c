@@ -284,6 +284,18 @@ mem_init_mp(void)
 	//
 	// LAB 4: Your code here:
 
+	uint32_t cpuno;
+
+	for (cpuno = 0; cpuno < NCPU; cpuno++)
+	{
+		uintptr_t kstktop_i = (uintptr_t) (KSTACKTOP - cpuno * (KSTKSIZE + KSTKGAP));
+
+		boot_map_region(kern_pgdir, kstktop_i - KSTKSIZE, KSTKSIZE, PADDR(percpu_kstacks[cpuno]), PTE_W | PTE_P );
+	}
+	
+
+
+
 }
 
 // --------------------------------------------------------------
@@ -328,13 +340,14 @@ page_init(void)
 	for (i = 0; i < npages; i++) {
 		pages[i].pp_link = NULL;
 
-		if (i==0){
+		if (i==0 || i == MPENTRY_PADDR/PGSIZE){
 			pages[i].pp_ref = 1;
 		}
 		else if (i>=npages_basemem && i< EXTPHYSMEM/PGSIZE + kern_pages)
 		{
 			pages[i].pp_ref = 1;
-		}
+		} 
+		
 		else
 		{
 			pages[i].pp_ref = 0;
@@ -630,7 +643,22 @@ mmio_map_region(physaddr_t pa, size_t size)
 	// Hint: The staff solution uses boot_map_region.
 	//
 	// Your code here:
-	panic("mmio_map_region not implemented");
+
+	size = (size_t) ROUNDUP(size, PGSIZE);
+
+	if (base + size > MMIOLIM)
+		panic ("not enough memory!");
+
+	boot_map_region(kern_pgdir, base, size, pa, PTE_W | PTE_PCD | PTE_PWT | PTE_P);
+
+	base += size;
+
+	return (void *) (base - size);
+
+
+
+
+	//panic("mmio_map_region not implemented");
 }
 
 static uintptr_t user_mem_check_addr;

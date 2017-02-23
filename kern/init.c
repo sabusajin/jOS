@@ -42,8 +42,11 @@ i386_init(void)
 	trap_init();
 
 	// Lab 4 multiprocessor initialization functions
+
+	
 	mp_init();
 	lapic_init();
+	
 
 	// Lab 4 multitasking initialization functions
 	pic_init();
@@ -52,6 +55,7 @@ i386_init(void)
 	// Your code here:
 
 	// Starting non-boot CPUs
+	lock_kernel();
 	boot_aps();
 
 #if defined(TEST)
@@ -117,8 +121,13 @@ mp_main(void)
 	//
 	// Your code here:
 
+	lock_kernel();
+
+	sched_yield();
+
+	
 	// Remove this after you finish Exercise 4
-	for (;;);
+	//for (;;);
 }
 
 /*
