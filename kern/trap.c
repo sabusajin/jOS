@@ -148,7 +148,7 @@ trap_init_percpu(void)
 	// when we trap to the kernel.
 	thiscpu->cpu_ts.ts_esp0 = (uintptr_t)  percpu_kstacks[thiscpu->cpu_id];
 	thiscpu->cpu_ts.ts_ss0 = GD_KD;
-	ts.ts_iomb = sizeof(struct Taskstate);
+	
 
 	// Initialize the TSS slot of the gdt.
 	gdt[(GD_TSS0 >> 3) + thiscpu->cpu_id] = SEG16(STS_T32A, (uint32_t) (&thiscpu->cpu_ts),
