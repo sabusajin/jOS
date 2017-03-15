@@ -30,8 +30,10 @@ set_pgfault_handler(void (*handler)(struct UTrapframe *utf))
 		// First time through!
 		// LAB 4: Your code here.
 
-		if (sys_page_alloc(thisenv->env_id, (void *)(UXSTACKTOP - PGSIZE), PTE_P | PTE_U | PTE_W))
-            panic("sys_page_alloc failed.");
+		if (sys_page_alloc(thisenv->env_id, (void *)(UXSTACKTOP - PGSIZE), 
+			PTE_P | PTE_U | PTE_W))
+			
+        	panic("sys_page_alloc failed.");
 
 	}
 
