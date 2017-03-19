@@ -48,6 +48,23 @@ void t_align();
 void t_mchk();
 void t_simderr();
 void t_syscall();
+void irq0();
+void irq1();
+void irq2();
+void irq3();
+void irq4();
+void irq5();
+void irq6();
+void irq7();
+void irq8();
+void irq9();
+void irq10();
+void irq11();
+void irq12();
+void irq13();
+void irq14();
+void irq15();
+
 
 static const char *trapname(int trapno)
 {
@@ -88,6 +105,7 @@ void
 trap_init(void)
 {
 	extern struct Segdesc gdt[];
+	int i;
 
 	// LAB 3: Your code here.
 	SETGATE(idt[T_DIVIDE], 0, GD_KT, t_divide, 0);
@@ -112,6 +130,27 @@ trap_init(void)
 
 
 	SETGATE(idt[T_SYSCALL], 0, GD_KT, t_syscall, 3);
+
+	SETGATE(idt[32], 0, GD_KT, irq0, 0);
+	SETGATE(idt[33], 0, GD_KT, irq1, 0);
+	SETGATE(idt[34], 0, GD_KT, irq2, 0);
+	SETGATE(idt[35], 0, GD_KT, irq3, 0);
+	SETGATE(idt[36], 0, GD_KT, irq4, 0);
+	SETGATE(idt[37], 0, GD_KT, irq5, 0);
+	SETGATE(idt[38], 0, GD_KT, irq6, 0);
+	SETGATE(idt[39], 0, GD_KT, irq7, 0);
+	SETGATE(idt[40], 0, GD_KT, irq8, 0);
+	SETGATE(idt[41], 0, GD_KT, irq9, 0);
+	SETGATE(idt[42], 0, GD_KT, irq10, 0);
+	SETGATE(idt[43], 0, GD_KT, irq11, 0);
+	SETGATE(idt[44], 0, GD_KT, irq12, 0);
+	SETGATE(idt[45], 0, GD_KT, irq13, 0);
+	SETGATE(idt[46], 0, GD_KT, irq14, 0);
+	SETGATE(idt[47], 0, GD_KT, irq15, 0);
+
+
+
+	
 
 	// Per-CPU setup 
 	trap_init_percpu();
@@ -249,6 +288,13 @@ trap_dispatch(struct Trapframe *tf)
 	// Handle clock interrupts. Don't forget to acknowledge the
 	// interrupt using lapic_eoi() before calling the scheduler!
 	// LAB 4: Your code here.
+
+	if (tf->tf_trapno >= 32 && tf->tf_trapno < 48)
+	{
+		lapic_eoi();
+        sched_yield();
+        return;
+	}
 
 
 
