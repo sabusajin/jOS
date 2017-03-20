@@ -75,9 +75,9 @@ duppage(envid_t envid, unsigned pn)
 
 	if (uvpt[pn] & PTE_COW || uvpt[pn] & PTE_W)
 	{
-		if (sys_page_map(0, address, envid, address, PTE_COW|PTE_U|PTE_P))
+		if (sys_page_map(thisenv->env_id, address, envid, address, PTE_COW|PTE_U|PTE_P))
             panic("sys_page_map failed");
-        if (sys_page_map(0, address, 0, address, PTE_COW|PTE_U|PTE_P))
+        if (sys_page_map(thisenv->env_id, address, thisenv->env_id, address, PTE_COW|PTE_U|PTE_P))
             panic("sys_page_map failed");
 	}
 	else
