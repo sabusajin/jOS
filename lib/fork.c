@@ -30,9 +30,7 @@ pgfault(struct UTrapframe *utf)
 	      (uvpd[PDX(addr)] & PTE_P) &&
 	      (uvpt[PGNUM(addr)] & PTE_P) &&
 	      (uvpt[PGNUM(addr)] & PTE_COW)))
-	{
-		panic("not copy-on-write");
-	}
+		panic("not copy on write");
 
 
 	// Allocate a new page, map it at a temporary location (PFTEMP),
@@ -43,13 +41,12 @@ pgfault(struct UTrapframe *utf)
 
 	// LAB 4: Your code here.
 
-	int PTE_NOCOW = PTE_SYSCALL & (~PTE_COW);
 	addr = ROUNDDOWN(addr, PGSIZE);
 	sys_page_alloc(0, PFTEMP, PTE_W | PTE_P | PTE_U);
 	memcpy(PFTEMP, addr, PGSIZE);
 	sys_page_map(0, PFTEMP,
 	             0, addr,
-	             (uvpt[PGNUM(addr)] & PTE_NOCOW) | PTE_W);
+	             (uvpt[PGNUM(addr)] & (PTE_SYSCALL & (~PTE_COW))) | PTE_W);
 	sys_page_unmap(0, PFTEMP);
 	return;
 
