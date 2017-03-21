@@ -374,7 +374,7 @@ sys_ipc_try_send(envid_t envid, uint32_t value, void *srcva, unsigned perm)
 		{
 
 			if (page_insert(e->env_pgdir, pp, e->env_ipc_dstva, perm))	
-				return E_NO_MEM;
+				return -E_NO_MEM;
 			e->env_ipc_perm = perm;
 		}
 
