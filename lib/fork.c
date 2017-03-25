@@ -26,6 +26,13 @@ pgfault(struct UTrapframe *utf)
 
 	// LAB 4: Your code here.
 
+	if (!((err & FEC_WR) &&
+	      (uvpd[PDX(addr)] & PTE_P) &&
+	      (uvpt[PGNUM(addr)] & PTE_P) &&
+	      (uvpt[PGNUM(addr)] & PTE_COW)))
+		panic("not copy on write");
+
+
 	// Allocate a new page, map it at a temporary location (PFTEMP),
 	// copy the data from the old page to the new page, then move the new
 	// page to the old page's address.
@@ -34,7 +41,16 @@ pgfault(struct UTrapframe *utf)
 
 	// LAB 4: Your code here.
 
-	panic("pgfault not implemented");
+	addr = ROUNDDOWN(addr, PGSIZE);
+	sys_page_alloc(0, PFTEMP, PTE_W | PTE_P | PTE_U);
+	memcpy(PFTEMP, addr, PGSIZE);
+	sys_page_map(0, PFTEMP,
+	             0, addr,
+	             (uvpt[PGNUM(addr)] & (PTE_SYSCALL & (~PTE_COW))) | PTE_W);
+	sys_page_unmap(0, PFTEMP);
+	return;
+
+	
 }
 
 //
@@ -54,8 +70,24 @@ duppage(envid_t envid, unsigned pn)
 	int r;
 
 	// LAB 4: Your code here.
-	panic("duppage not implemented");
+
+	void *address = (void *) (pn*PGSIZE);
+
+	if (uvpt[pn] & PTE_COW || uvpt[pn] & PTE_W)
+	{
+		if (sys_page_map(thisenv->env_id, address, envid, address, PTE_COW|PTE_U|PTE_P))
+            panic("sys_page_map failed");
+        if (sys_page_map(thisenv->env_id, address, thisenv->env_id, address, PTE_COW|PTE_U|PTE_P))
+            panic("sys_page_map failed");
+	}
+	else
+		sys_page_map(0, address, envid, address, PTE_U|PTE_P);
+
 	return 0;
+
+
+	panic("duppage not implemented");
+	
 }
 
 //
@@ -78,6 +110,41 @@ envid_t
 fork(void)
 {
 	// LAB 4: Your code here.
+
+	int r;
+
+	set_pgfault_handler(pgfault);
+
+	if ((r = sys_exofork()) < 0)
+		panic ("No memory");
+	else if (r == 0)
+	{
+		set_pgfault_handler(pgfault);
+		thisenv = &envs[ENVX(sys_getenvid())];
+		return 0;
+	}
+
+	int i;
+	for (i=0; i < USTACKTOP; i+=PGSIZE)
+	{
+		if ((uvpd [PDX(i)] & PTE_P) && (uvpt [PGNUM(i)] & PTE_P) 
+			&& (uvpt [PGNUM(i)] & PTE_U))
+			duppage (r, PGNUM(i));
+	}
+
+	if (sys_page_alloc(r, (void *)(UXSTACKTOP-PGSIZE), PTE_U|PTE_W|PTE_P))
+		panic ("sys_page_alloc error in fork()");
+
+	extern void _pgfault_upcall();
+	if(sys_env_set_pgfault_upcall(r, _pgfault_upcall))
+		panic ("sys_env_set_pgfault_upcall error in fork()");
+
+	if (sys_env_set_status(r, ENV_RUNNABLE))
+		panic ("Cannot set status in sys_env_set_status");
+	return r;
+
+
+
 	panic("fork not implemented");
 }
 
