@@ -414,7 +414,7 @@ sys_ipc_recv(void *dstva)
 
 	sched_yield();
 
-	return 0;
+	
 }
 
 // Dispatches to the correct kernel function, passing the arguments.
