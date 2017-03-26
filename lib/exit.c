@@ -3,7 +3,7 @@
 void
 exit(void)
 {
-	close_all();
+	//close_all();
 	sys_env_destroy(0);
 }
 
