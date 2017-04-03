@@ -170,7 +170,7 @@ file_block_walk(struct File *f, uint32_t filebno, uint32_t **ppdiskbno, bool all
 		} else if (!alloc && !f->f_indirect)
 			return -E_NOT_FOUND;
 
-	// Out of range
+
 	} else
 		return -E_INVAL;
 

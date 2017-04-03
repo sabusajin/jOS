@@ -94,8 +94,6 @@ flush_block(void *addr)
 	}
 	return;
 
-
-	
 }
 
 // Test that the block cache works, by smashing the superblock and
