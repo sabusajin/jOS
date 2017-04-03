@@ -297,6 +297,18 @@ trap_dispatch(struct Trapframe *tf)
         return;
 	}
 
+	if (tf->tf_trapno == IRQ_OFFSET+IRQ_KBD)
+	{
+		kbd_intr();
+		return;
+	}
+
+	if (tf->tf_trapno == IRQ_OFFSET+IRQ_SERIAL)
+	{
+		serial_intr();
+		return;
+	}
+
 
 
 	// Handle keyboard and serial interrupts.

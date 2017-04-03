@@ -214,6 +214,7 @@ serve_read(envid_t envid, union Fsipc *ipc)
 		cprintf("serve_read %08x %08x %08x\n", envid, req->req_fileid, req->req_n);
 
 	// Lab 5: Your code here:
+
 	int r;
 
 	struct OpenFile * open_file;
@@ -240,8 +241,8 @@ serve_write(envid_t envid, struct Fsreq_write *req)
 {
 	if (debug)
 		cprintf("serve_write %08x %08x %08x\n", envid, req->req_fileid, req->req_n);
-
 	// LAB 5: Your code here.
+
 	int r;
 	struct OpenFile * open_file;
 	if ((r = openfile_lookup(envid, req->req_fileid, &open_file)) < 0)
@@ -315,6 +316,7 @@ fshandler handlers[] = {
 	[FSREQ_SET_SIZE] =	(fshandler)serve_set_size,
 	[FSREQ_SYNC] =		serve_sync
 };
+#define NHANDLERS (sizeof(handlers)/sizeof(handlers[0]))
 
 void
 serve(void)
@@ -340,7 +342,7 @@ serve(void)
 		pg = NULL;
 		if (req == FSREQ_OPEN) {
 			r = serve_open(whom, (struct Fsreq_open*)fsreq, &pg, &perm);
-		} else if (req < ARRAY_SIZE(handlers) && handlers[req]) {
+		} else if (req < NHANDLERS && handlers[req]) {
 			r = handlers[req](whom, fsreq);
 		} else {
 			cprintf("Invalid request code %d from %08x\n", req, whom);
