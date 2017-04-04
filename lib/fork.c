@@ -70,23 +70,22 @@ duppage(envid_t envid, unsigned pn)
 	int r;
 
 	// LAB 4: Your code here.
-
-	void *address = (void *) (pn*PGSIZE);
-
-	if (uvpt[pn] & PTE_COW || uvpt[pn] & PTE_W)
+	if (((uvpt[pn] & PTE_COW) ||
+	    (uvpt[pn] & PTE_W)) &&
+	    !(uvpt[pn] & PTE_SHARE))
 	{
-		if (sys_page_map(thisenv->env_id, address, envid, address, PTE_COW|PTE_U|PTE_P))
-            panic("sys_page_map failed");
-        if (sys_page_map(thisenv->env_id, address, thisenv->env_id, address, PTE_COW|PTE_U|PTE_P))
-            panic("sys_page_map failed");
+		sys_page_map(0, PGADDR(0, pn, 0),
+		             envid, PGADDR(0, pn, 0),
+		             ((uvpt[pn] & PTE_SYSCALL) & (~PTE_W)) | PTE_COW);
+		sys_page_map(0, PGADDR(0, pn, 0),
+		             0, PGADDR(0, pn, 0),
+		             ((uvpt[pn] & PTE_SYSCALL) & (~PTE_W)) | PTE_COW);
+	}else{
+		sys_page_map(0, PGADDR(0, pn, 0),
+		             envid, PGADDR(0, pn, 0),
+		             (uvpt[pn] & PTE_SYSCALL));
 	}
-	else
-		sys_page_map(0, address, envid, address, PTE_U|PTE_P);
-
 	return 0;
-
-
-	panic("duppage not implemented");
 	
 }
 
