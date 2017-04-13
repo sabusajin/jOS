@@ -220,7 +220,7 @@ sys_page_alloc(envid_t envid, void *va, int perm)
 
 	
 
-	pp->pp_ref++;
+	
 
 	if (page_insert(e->env_pgdir, pp, va, perm))
 	{
