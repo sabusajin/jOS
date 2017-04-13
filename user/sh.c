@@ -55,31 +55,33 @@ again:
 			// then close the original 'fd'.
 
 			// LAB 5: Your code here.
-			if ((fd = open(t, O_WRONLY|O_CREAT|O_TRUNC)) < 0) {
-				cprintf("open %s for write: %e", t, fd);
-				exit();
-			}
-			if (fd != 0) {
-				dup(fd, 1);
-				close(fd);
-			}
-			
-			
-			break;
-
-		case '>':	// Output redirection
-			// Grab the filename from the argument list
-			
-			if ((fd = open(t, O_RDONLY)) < 0) {
+			if ((fd = open(t, O_RDONLY)) < 0)
+			{
 				cprintf("open %s for read: %e", t, fd);
 				exit();
 			}
-			if (fd != 1) {
+			if (fd != 0) {
 				dup(fd, 0);
 				close(fd);
 			}
 			break;
+			
 
+		case '>':	// Output redirection
+			// Grab the filename from the argument list
+			if (gettoken(0, &t) != 'w') {
+				cprintf("syntax error: > not followed by word\n");
+				exit();
+			}
+			if ((fd = open(t, O_WRONLY|O_CREAT|O_TRUNC)) < 0) {
+				cprintf("open %s for write: %e", t, fd);
+				exit();
+			}
+			if (fd != 1) {
+				dup(fd, 1);
+				close(fd);
+			}
+			break;
 		case '|':	// Pipe
 			if ((r = pipe(p)) < 0) {
 				cprintf("pipe: %e", r);
