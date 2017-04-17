@@ -44,8 +44,11 @@ i386_init(void)
 	trap_init();
 
 	// Lab 4 multiprocessor initialization functions
+
+	
 	mp_init();
 	lapic_init();
+	
 
 	// Lab 4 multitasking initialization functions
 	pic_init();
@@ -58,6 +61,7 @@ i386_init(void)
 	// Your code here:
 
 	// Starting non-boot CPUs
+	lock_kernel();
 	boot_aps();
 
 	// Start fs.
@@ -74,6 +78,7 @@ i386_init(void)
 #else
 	// Touch all you want.
 	ENV_CREATE(user_icode, ENV_TYPE_USER);
+
 #endif // TEST*
 
 	// Should not be necessary - drains keyboard because interrupt has given up.
@@ -134,8 +139,13 @@ mp_main(void)
 	//
 	// Your code here:
 
+	lock_kernel();
+
+	sched_yield();
+
+	
 	// Remove this after you finish Exercise 4
-	for (;;);
+	//for (;;);
 }
 
 /*

@@ -1,4 +1,3 @@
-
 #include <inc/string.h>
 #include <inc/lib.h>
 

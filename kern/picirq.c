@@ -95,3 +95,4 @@ irq_eoi(void)
 	outb(IO_PIC1, 0x20);
 	outb(IO_PIC2, 0x20);
 }
+

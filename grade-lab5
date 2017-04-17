@@ -3,7 +3,7 @@
 from gradelib import *
 
 r = Runner(save("jos.out"),
-           stop_breakpoint("readline"))
+           stop_breakpoint("cons_getc"))
 
 def matchtest(parent, name, *args, **kw):
     def do_test():
@@ -58,11 +58,6 @@ def test_spawn():
             'hello, world',
             'i am environment 00001002',
             'No runnable environments in the system!')
-
-@test(5, "Protection I/O space")
-def test_faultio():
-    r.user_test("spawnfaultio")
-    r.match('TRAP')
 
 @test(10, "PTE_SHARE [testpteshare]")
 def test_pte_share():

@@ -189,3 +189,4 @@ struct PageInfo {
 
 #endif /* !__ASSEMBLER__ */
 #endif /* !JOS_INC_MEMLAYOUT_H */
+

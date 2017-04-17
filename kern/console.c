@@ -482,3 +482,4 @@ iscons(int fdnum)
 	// used by readline
 	return 1;
 }
+
