@@ -2,3 +2,6 @@
 #define JOS_KERN_E1000_H
 
 #endif	// JOS_KERN_E1000_H
+
+#include <kern/pci.h>
+int e1000_attach(struct pci_func *pcif);

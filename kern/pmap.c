@@ -44,8 +44,8 @@ i386_detect_memory(void)
 
 	// Calculate the number of physical pages available in both base
 	// and extended memory.
-	if (ext16mem)
-		totalmem = 16 * 1024 + ext16mem;
+	if (ext16mem){
+		totalmem = 16 * 1024 + ext16mem;}
 	else if (extmem)
 		totalmem = 1 * 1024 + extmem;
 	else
