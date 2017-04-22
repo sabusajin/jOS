@@ -654,11 +654,6 @@ mmio_map_region(physaddr_t pa, size_t size)
 	base += size;
 
 	return (void *) (base - size);
-
-
-
-
-	//panic("mmio_map_region not implemented");
 }
 
 static uintptr_t user_mem_check_addr;
