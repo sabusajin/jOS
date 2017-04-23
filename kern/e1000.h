@@ -1,10 +1,9 @@
 #ifndef JOS_KERN_E1000_H
 #define JOS_KERN_E1000_H
 
-#endif	// JOS_KERN_E1000_H
-
 #include <kern/pci.h>
 #include <kern/pmap.h>
+#include <inc/string.h>
 
 #define E1000_DEV_ID_82540EM	0x100E
 #define E1000_STATUS   0x00008 / 4  /* Device Status - RO */
@@ -59,6 +58,7 @@
 #define TXRING_LEN 64
 
 int e1000_attach(struct pci_func *pcif);
+int e1000_transmit(char *pkt, size_t len);
 volatile uint32_t *mmio_e1000;
 
 
@@ -82,6 +82,16 @@ struct e1000_tx_desc {
         } fields;
     } upper;
 };
+
+/*Packet*/
+struct packet {
+
+	char pkt[PGSIZE];
+};
+
+
+
+#endif	// JOS_KERN_E1000_H
 
 
 

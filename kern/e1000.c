@@ -2,7 +2,8 @@
 
 
 // LAB 6: Your driver code here
-struct e1000_tx_desc tx_desc_buf[TXRING_LEN] __attribute__ ((aligned (16)));
+struct e1000_tx_desc tx_desc_buf[TXRING_LEN] __attribute__ ((aligned (PGSIZE)));
+struct packet packet_buf[TXRING_LEN] __attribute__ ((aligned (16)));
 
 static void 
 e1000_init()
@@ -27,6 +28,23 @@ e1000_init()
 	mmio_e1000[E1000_TIPG] |= (E1000_TIPG_IPGT | E1000_TIPG_IPGR1 | E1000_TIPG_IPGR2);
 
 	
+	
+}
+
+int e1000_transmit(char *pkt, size_t length)
+{
+	if (length > PGSIZE)
+		length = PGSIZE;
+	uint32_t tail = mmio_e1000[E1000_TDT];
+	struct e1000_tx_desc *tail_desc = &tx_desc_buf[tail];
+	if (tail_desc->upper.fields.status != E1000_TXD_STAT_DD)
+		return -1;
+	memmove((void *) &packet_buf[tail], (void *) pkt, length);
+	tail_desc->lower.flags.length = length;
+	tail_desc->upper.fields.status = ~E1000_TXD_STAT_DD;
+	tail_desc->lower.data |=  (E1000_TXD_CMD_RS | E1000_TXD_CMD_EOP);
+	mmio_e1000[E1000_TDT] = (tail + 1) % TXRING_LEN;
+	return 0;
 	
 }
 
