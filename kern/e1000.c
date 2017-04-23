@@ -56,7 +56,7 @@ e1000_attach(struct pci_func *pcif)
 	mmio_e1000 = mmio_map_region(pcif->reg_base[0], pcif->reg_size[0]);
 
 	assert(mmio_e1000[E1000_STATUS] == 0x80080783);
-	e1000_init();
+	e1000_init();	
 	return 0;
 }
 	
