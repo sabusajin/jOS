@@ -464,7 +464,8 @@ sys_e1000_transmit(char* pkt, size_t len)
 		sys_yield();
 	}
 	if (i == 20)
-		return -1;
+		panic ("buffer full:\n");
+	
 	return 0;
 }
 
