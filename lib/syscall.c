@@ -128,3 +128,9 @@ sys_e1000_transmit(char *pkt, size_t len)
 {
 	return (int) syscall(SYS_e1000_transmit, 0, (uint32_t) pkt, (uint32_t) len, 0, 0, 0); 
 }
+
+int
+sys_net_recv(void * addr)
+{
+	return (int) syscall(SYS_net_recv, 0, (uint32_t)addr, 0, 0, 0, 0);
+}

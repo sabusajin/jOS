@@ -25,6 +25,7 @@
 #define E1000_RDH      0x02810 / 4  /* RX Descriptor Head - RW */
 #define E1000_RDT      0x02818 / 4 /* RX Descriptor Tail - RW */
 
+
 /* Transmit Descriptor bit definitions */
 #define E1000_TXD_DTYP_D     0x00100000 /* Data Descriptor */
 #define E1000_TXD_DTYP_C     0x00000000 /* Context Descriptor */
@@ -83,6 +84,7 @@
 #define E1000_RCTL_MO_3           0x00003000    /* multicast offset 15:4 */
 #define E1000_RCTL_MDR            0x00004000    /* multicast desc ring 0 */
 #define E1000_RCTL_BAM 		  0x00008000 /* broadcast enable */
+#define E1000_RXD_STAT_DD       0x01
 
 /* these buffer sizes are valid if E1000_RCTL_BSEX is 0 */
 #define E1000_RCTL_SZ_2048        0x00000000    /* rx buffer size 2048 */
@@ -112,6 +114,7 @@
 
 #define TXRING_LEN 64
 #define RXRING_LEN 128
+#define DATA_SIZE 4096
 
 // Transmission descriptor bits
 #define E1000_TXD_DEXT	0x20 /* bit 5 in CMD section */
@@ -121,6 +124,7 @@
 
 int e1000_attach(struct pci_func *pcif);
 int e1000_transmit(char *pkt, size_t len);
+int e1000_recv(uint8_t *data);
 volatile uint32_t *mmio_e1000;
 
 

@@ -16,8 +16,9 @@ e1000_init()
 	{
 		tx_desc_buf[i].buffer_addr = PADDR(&packet_buf[i]);
 		tx_desc_buf[i].upper.fields.status = E1000_TXD_STAT_DD;
+		//tx_desc_buf[i].lower.flags.cmd &= ~E1000_TXD_DEXT; // set legacy descriptor mode
 		tx_desc_buf[i].lower.flags.cmd |= E1000_TXD_RS;			// set RS bit
-		tx_desc_buf[i].lower.flags.cmd &= ~E1000_TXD_DEXT; // set legacy descriptor mode
+		
 	} 
 	i = PADDR(&rcv_packet_buf[0]);
 	cprintf ("%x\n", PADDR(&rcv_packet_buf[0]));
@@ -68,19 +69,37 @@ e1000_init()
 
 int e1000_transmit(char *pkt, size_t length)
 {
-	if (length > PGSIZE)
-		panic ("max size exceeded \n");
 	uint32_t tail = mmio_e1000[E1000_TDT];
-	struct e1000_tx_desc *tail_desc = &tx_desc_buf[tail];
+	struct e1000_tx_desc * tail_desc = &tx_desc_buf[tail];
 	if (tail_desc->upper.fields.status != E1000_TXD_STAT_DD)
+	{
 		return -1;
-	memmove((void *) &packet_buf[tail], (void *) pkt, length);
+	}
+	length = length > DATA_SIZE ? DATA_SIZE : length;
+	memmove(&packet_buf[tail], pkt, length);
 	tail_desc->lower.flags.length = length;
-	tail_desc->upper.fields.status = ~E1000_TXD_STAT_DD;
+	tail_desc->upper.fields.status = 0;
 	tail_desc->lower.data |=  (E1000_TXD_CMD_RS | E1000_TXD_CMD_EOP);
 	mmio_e1000[E1000_TDT] = (tail + 1) % TXRING_LEN;
 	return 0;
-	
+}
+
+int
+e1000_recv(uint8_t * data)
+{
+	static uint32_t real_tail = 0;
+	uint32_t tail = real_tail;
+	struct e1000_rx_desc * tail_desc = &rx_desc_buf[tail];
+	if (!(tail_desc->status & E1000_RXD_STAT_DD))
+	{
+		return -1;
+	}
+	size_t length = tail_desc->length;
+	memmove(data, &rcv_packet_buf[tail], length);
+	tail_desc->status = 0;
+	mmio_e1000[E1000_RDT] = tail;
+	real_tail = (tail + 1) % RXRING_LEN;
+	return length;
 }
 
 

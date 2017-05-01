@@ -15,7 +15,9 @@ output(envid_t ns_envid)
 	while (1) {
 		   req = ipc_recv(0, &nsipcbuf, 0);
 		   if (req == NSREQ_OUTPUT) {
-     while(sys_e1000_transmit(nsipcbuf.pkt.jp_data, nsipcbuf.pkt.jp_len) < 0);
+        while(sys_e1000_transmit(nsipcbuf.pkt.jp_data, nsipcbuf.pkt.jp_len) < 0){
+	sys_yield();
+	}
    }
  }
 }

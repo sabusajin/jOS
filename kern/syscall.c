@@ -457,16 +457,15 @@ int
 sys_e1000_transmit(char* pkt, size_t len)
 {
 	user_mem_assert(curenv, pkt, len, PTE_W);
-	int i = 0, maxtries = 20;
-	while (e1000_transmit(pkt,len) < 0 && i<20)
-	{
-		i++;
-		sys_yield();
-	}
-	if (i == 20)
-		panic ("buffer full:\n");
+	return e1000_transmit(pkt,len);
 	
-	return 0;
+}
+
+static int
+sys_net_recv(uint8_t * addr)
+{
+	user_mem_assert(curenv, addr, DATA_SIZE, PTE_U);
+	return e1000_recv(addr);
 }
 
 // Dispatches to the correct kernel function, passing the arguments.
@@ -515,6 +514,8 @@ syscall(uint32_t syscallno, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, 
 			return (int32_t) sys_time_msec();
 		case SYS_e1000_transmit:
 			return (int32_t) sys_e1000_transmit((char *)a1, (size_t) a2);
+		case SYS_net_recv:
+			return (int32_t)sys_net_recv((uint8_t *)a1);
 
 			
 		default:
